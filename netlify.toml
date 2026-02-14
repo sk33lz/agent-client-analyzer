@@ -20,3 +20,8 @@
   from = "/api/client"
   to = "/.netlify/functions/client"
   status = 200
+
+[[redirects]]
+  from = "/api/patterns"
+  to = "/.netlify/functions/patterns"
+  status = 200

@@ -22,6 +22,8 @@
 - `/api/info.json`: Static JSON backing `/api/info`
 - `/api/client`: Function endpoint with machine-readable request headers (primary)
 - `/api/client.json`: Static fallback for `/api/client` on hosts without serverless runtime
+- `/api/patterns`: Function endpoint for machine-readable request/header pattern analysis
+- `/api/patterns.json`: Static fallback for `/api/patterns` on hosts without serverless runtime
 - `/api/headers`: Machine-readable header guidance for agents
 - `/api/headers.json`: Static JSON backing `/api/headers`
 - `/api/client-schema`: JSON schema for the live report format
@@ -29,6 +31,7 @@
 
 ## No-JS Agents
 - Agents that only make HTTP requests should use `GET /api/client`.
+- Agents can call `GET /api/patterns` to get classification signals (browser/cli/library/bot, automation likelihood).
 - The response is JSON and does not require JavaScript execution.
 - `GET /api/info` can be used for endpoint discovery.
 - On static hosts like Surge, `/api/client` is a static placeholder and cannot echo per-request headers.
@@ -37,7 +40,9 @@
 - `index.html`: UI + client signal collection logic + background visuals
 - `api/info.json`: Agent-facing service metadata
 - `netlify/functions/client.js`: Netlify function for `/api/client`
+- `netlify/functions/patterns.js`: Netlify function for `/api/patterns`
 - `functions/api/client.js`: Cloudflare Pages function for `/api/client`
+- `functions/api/patterns.js`: Cloudflare Pages function for `/api/patterns`
 - `api/headers.json`: Header guidance for machine clients
 - `api/client-schema.json`: Schema for the runtime report object
 - `_redirects`: Clean endpoint aliases for static hosts

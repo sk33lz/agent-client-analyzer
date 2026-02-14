@@ -34,6 +34,8 @@
     "profileJson": "/api/info.json",
     "client": "/api/client",
     "clientJson": "/api/client.json",
+    "patterns": "/api/patterns",
+    "patternsJson": "/api/patterns.json",
     "headers": "/api/headers",
     "headersJson": "/api/headers.json",
     "clientSchema": "/api/client-schema",
@@ -45,6 +47,11 @@
       "endpoint": "/api/client",
       "format": "application/json",
       "notes": "On static hosts this returns a static JSON placeholder; on Netlify/Cloudflare function runtimes it returns observed request headers."
+    },
+    "patternAnalysis": {
+      "endpoint": "/api/patterns",
+      "format": "application/json",
+      "notes": "Analyzes live request/header patterns on function runtimes; serves static placeholder on static-only hosts."
     },
     "noJavascriptAccess": {
       "entrypoint": "/api/client",

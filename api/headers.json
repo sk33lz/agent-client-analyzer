@@ -7,6 +7,8 @@
   "endpoints": {
     "client": "/api/client",
     "clientJson": "/api/client.json",
+    "patterns": "/api/patterns",
+    "patternsJson": "/api/patterns.json",
     "headers": "/api/headers",
     "headersJson": "/api/headers.json",
     "profile": "/api/info",
@@ -32,6 +34,7 @@
   },
   "notes": [
     "Use /api/client for machine-readable request header inspection.",
+    "Use /api/patterns for machine-readable pattern analysis derived from request headers.",
     "On static-only hosts (for example Surge), /api/client is a static placeholder and cannot echo per-request headers.",
     "No JavaScript is required: agents can call /api/client with plain HTTP GET.",
     "Use /api/info for service metadata and /api/client-schema for report structure.",

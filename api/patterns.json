@@ -1,0 +1,28 @@
+{
+  "endpoint": "/api/patterns",
+  "generatedAt": "static",
+  "runtime": "static-host",
+  "dynamicAnalysis": false,
+  "analysis": {
+    "clientFamily": "unknown",
+    "isLikelyAutomation": null,
+    "automationScore": null,
+    "isLikelyAIClient": null,
+    "signals": [
+      "static-host:no-live-request-context"
+    ],
+    "headerPresence": {
+      "userAgent": false,
+      "accept": false,
+      "acceptLanguage": false,
+      "secChUa": false,
+      "secFetchMode": false
+    }
+  },
+  "headers": {},
+  "notes": [
+    "This host serves static files only.",
+    "Pattern analysis needs live request headers from a function runtime.",
+    "On Netlify or Cloudflare Pages, /api/patterns analyzes live request/header signals."
+  ]
+}
