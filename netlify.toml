@@ -1,0 +1,22 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/api/info"
+  to = "/api/info.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/headers"
+  to = "/api/headers.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/client-schema"
+  to = "/api/client-schema.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/client"
+  to = "/.netlify/functions/client"
+  status = 200

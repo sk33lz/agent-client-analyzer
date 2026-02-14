@@ -1,0 +1,4 @@
+/api/info  /api/info.json  200
+/api/headers  /api/headers.json  200
+/api/client-schema  /api/client-schema.json  200
+/api/client  /.netlify/functions/client  200

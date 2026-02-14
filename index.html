@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Client Signals</title>
+  <style>
+    :root {
+      --bg-1: #03131d;
+      --bg-2: #062635;
+      --panel: rgba(5, 20, 30, 0.62);
+      --panel-border: rgba(134, 223, 255, 0.25);
+      --text: #e5fbff;
+      --muted: #8fc8d8;
+      --accent: #58f0d0;
+      --accent-2: #7cb7ff;
+      --shadow: rgba(9, 26, 37, 0.45);
+      --circuit-base-width: 2;
+      --circuit-pulse-width: 2.8;
+      --circuit-dash: 2 120;
+      --panel-border-width: 1px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "IBM Plex Mono", "JetBrains Mono", "Fira Code", "Menlo", "Consolas", monospace;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(88, 240, 208, 0.2), transparent 45%),
+        radial-gradient(circle at 80% 90%, rgba(124, 183, 255, 0.22), transparent 40%),
+        linear-gradient(155deg, var(--bg-1), var(--bg-2));
+      padding: 20px;
+    }
+
+    .circuit-board {
+      position: fixed;
+      inset: -3% -3%;
+      pointer-events: none;
+      z-index: 0;
+      width: 106%;
+      height: 106%;
+      opacity: 0.92;
+    }
+
+    .binary-screen {
+      position: fixed;
+      inset: -12% -10%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      opacity: 0.62;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: rgba(210, 245, 255, 0.92);
+      text-shadow: 0 0 8px rgba(118, 249, 220, 0.45);
+      mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.95) 12%, rgba(0, 0, 0, 0.95) 88%, transparent 100%);
+    }
+
+    .binary-col {
+      position: absolute;
+      top: 0;
+      white-space: pre;
+      line-height: 1.15;
+      user-select: none;
+      display: block;
+      animation: matrixFall 6.6s linear infinite;
+    }
+
+    .binary-col.alt {
+      color: rgba(118, 249, 220, 0.72);
+      animation-duration: 7.8s;
+    }
+
+    .binary-col.fast {
+      animation-duration: 5.2s;
+    }
+
+    .binary-col.slow {
+      animation-duration: 9.6s;
+    }
+
+    .trace-base {
+      stroke: rgba(146, 220, 255, 0.16);
+      stroke-width: var(--circuit-base-width);
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .trace-pulse {
+      stroke: #76f9dc;
+      stroke-width: var(--circuit-pulse-width);
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: var(--circuit-dash);
+      animation: pulseTravel 2.8s linear infinite;
+      filter: drop-shadow(0 0 5px rgba(88, 240, 208, 0.8));
+    }
+
+    .trace-pulse.alt {
+      stroke: #8ec4ff;
+      stroke-dasharray: 2 140;
+      animation-duration: 3.4s;
+      animation-direction: reverse;
+      filter: drop-shadow(0 0 5px rgba(142, 196, 255, 0.72));
+    }
+
+    .trace-pulse.slow {
+      animation-duration: 4.2s;
+    }
+
+    .trace-pulse.inner {
+      stroke-dasharray: 2 170;
+      animation-duration: 5.8s;
+      opacity: 0.85;
+    }
+
+    @keyframes pulseTravel {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: -380; }
+    }
+
+    @keyframes matrixFall {
+      from { transform: translateY(-130vh); }
+      to { transform: translateY(130vh); }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      position: relative;
+      z-index: 1;
+      background: var(--panel);
+      border: var(--panel-border-width) solid var(--panel-border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 16px 40px var(--shadow);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 1.4vw + 0.8rem, 1.9rem);
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .tag {
+      border: 1px solid rgba(88, 240, 208, 0.35);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .agent-note {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(118, 249, 220, 0.35);
+      border-radius: 10px;
+      background: rgba(6, 26, 38, 0.5);
+      color: rgba(220, 245, 255, 0.94);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .agent-note code {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .links {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    a {
+      color: var(--accent-2);
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(124, 183, 255, 0.7);
+      overflow-wrap: anywhere;
+    }
+
+    a:hover {
+      color: #b6d4ff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid rgba(124, 183, 255, 0.35);
+      background: rgba(9, 29, 43, 0.92);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 0.86rem;
+    }
+
+    button:hover {
+      border-color: rgba(88, 240, 208, 0.55);
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    pre {
+      margin: 0;
+      background: rgba(3, 11, 18, 0.92);
+      border: 1px solid rgba(124, 183, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      overflow: auto;
+      min-height: 230px;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: #d8f6ff;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .status {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      .panel {
+        padding: 14px;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      pre {
+        min-height: 180px;
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .trace-pulse,
+      .binary-col {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg class="circuit-board" viewBox="-220 -120 2040 1180" preserveAspectRatio="none" aria-hidden="true">
+    <path id="circuit-top" class="trace-base" d="M-180 -60 H300 V-20 H620 V-60 H980 V-20 H1340 V-60 H1780 V220 H1340 V180 H980 V220 H620 V180 H300 V220 H-180 Z" />
+    <path id="circuit-upper-mid" class="trace-base" d="M-140 160 H320 V200 H660 V160 H980 V200 H1300 V160 H1740 V440 H1300 V400 H980 V440 H660 V400 H320 V440 H-140 Z" />
+    <path id="circuit-lower-mid" class="trace-base" d="M-100 380 H360 V340 H700 V380 H980 V340 H1260 V380 H1700 V660 H1260 V620 H980 V660 H700 V620 H360 V660 H-100 Z" />
+    <path id="circuit-bottom" class="trace-base" d="M-60 600 H380 V640 H720 V600 H980 V640 H1240 V600 H1660 V880 H1240 V840 H980 V880 H720 V840 H380 V880 H-60 Z" />
+
+    <path class="trace-pulse" d="M-180 -60 H300 V-20 H620 V-60 H980 V-20 H1340 V-60 H1780 V220 H1340 V180 H980 V220 H620 V180 H300 V220 H-180 Z" />
+    <path class="trace-pulse alt" d="M-140 160 H320 V200 H660 V160 H980 V200 H1300 V160 H1740 V440 H1300 V400 H980 V440 H660 V400 H320 V440 H-140 Z" />
+    <path class="trace-pulse inner" d="M-100 380 H360 V340 H700 V380 H980 V340 H1260 V380 H1700 V660 H1260 V620 H980 V660 H700 V620 H360 V660 H-100 Z" />
+    <path class="trace-pulse alt" d="M-60 600 H380 V640 H720 V600 H980 V640 H1240 V600 H1660 V880 H1240 V840 H980 V880 H720 V840 H380 V880 H-60 Z" />
+  </svg>
+  <div class="binary-screen" aria-hidden="true">
+    <span class="binary-col alt" style="left: 6%; animation-delay: -5.8s;">01000101<br>01001100<br>01001100<br>01001111<br>00100000<br>01000001<br>01001001<br>00100000<br>01000001<br>01000111<br>01000101<br>01001110<br>01010100<br>00100000</span>
+    <span class="binary-col" style="left: 44%; animation-delay: -1.2s;">00100000<br>01000001<br>01001001<br>00100000<br>01000001<br>01000111<br>01000101<br>01001110<br>01010100<br>00100000<br>01001000<br>01000101<br>01001100<br>01001100</span>
+    <span class="binary-col alt" style="left: 86%; animation-delay: -2.7s;">00100000<br>01000001<br>01000111<br>01000101<br>01001110<br>01010100<br>00100000<br>01001000<br>01000101<br>01001100<br>01001100<br>01001111<br>00100000<br>01000001</span>
+  </div>
+  <main class="wrap">
+    <section class="panel">
+      <div class="header">
+        <div>
+          <h1>Agent Client Signals</h1>
+          <p>Welcome, AI agent. This site exposes a static profile endpoint plus a live browser-client report generated in-session.</p>
+        </div>
+        <span class="tag">Agent-friendly JSON</span>
+      </div>
+      <div class="agent-note" id="agent-note">
+        Agent message: <code id="agent-note-message">HELLO AI AGENT</code>
+      </div>
+      <div class="links">
+        <a href="/api/info">/api/info</a>
+        <a href="/api/info.json">/api/info.json</a>
+        <a href="/api/client">/api/client</a>
+        <a href="/api/client.json">/api/client.json</a>
+        <a href="/api/headers">/api/headers</a>
+        <a href="/api/headers.json">/api/headers.json</a>
+        <a href="/api/client-schema">/api/client-schema</a>
+        <a href="/api/client-schema.json">/api/client-schema.json</a>
+      </div>
+      <div class="actions">
+        <button id="copy-btn" type="button">Copy Live Report JSON</button>
+        <button id="download-btn" type="button">Download Live Report</button>
+      </div>
+      <div class="status" id="status">Collecting client signals ...</div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Endpoint Profile</h2>
+        <pre id="profile-output">Loading /api/info ...</pre>
+      </article>
+      <article class="panel">
+        <h2>Request Inspection (/api/client)</h2>
+        <pre id="client-output">Loading /api/client ...</pre>
+      </article>
+      <article class="panel">
+        <h2>Live Client Report</h2>
+        <pre id="report-output">Assembling browser context ...</pre>
+      </article>
+    </section>
+  </main>
+
+  <script id="live-client-report" type="application/json">{}</script>
+
+  <script>
+    const AGENT_MESSAGE = {
+      text: 'HELLO AI AGENT',
+      encoding: 'ASCII',
+      bytes: [
+        '01001000',
+        '01000101',
+        '01001100',
+        '01001100',
+        '01001111',
+        '00100000',
+        '01000001',
+        '01001001',
+        '00100000',
+        '01000001',
+        '01000111',
+        '01000101',
+        '01001110',
+        '01010100'
+      ]
+    };
+
+    const state = {
+      profile: null,
+      clientEndpoint: null,
+      report: null
+    };
+
+    function pickConnection() {
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!connection) {
+        return null;
+      }
+
+      return {
+        effectiveType: connection.effectiveType || null,
+        downlinkMbps: connection.downlink || null,
+        rttMs: connection.rtt || null,
+        saveData: connection.saveData || false
+      };
+    }
+
+    function storageAvailable(type) {
+      try {
+        const storage = window[type];
+        if (!storage) {
+          return false;
+        }
+        const key = '__agent_probe__';
+        storage.setItem(key, key);
+        storage.removeItem(key);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function getClientReport() {
+      return {
+        service: 'agent-client-signals',
+        source: window.location.origin,
+        collectedAt: new Date().toISOString(),
+        agentMessage: AGENT_MESSAGE,
+        client: {
+          url: window.location.href,
+          path: window.location.pathname,
+          referrer: document.referrer || null,
+          userAgent: navigator.userAgent,
+          language: navigator.language || null,
+          languages: navigator.languages || [],
+          platform: navigator.platform || null,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+          online: navigator.onLine,
+          doNotTrack: navigator.doNotTrack || null,
+          cookiesEnabled: navigator.cookieEnabled,
+          hardwareConcurrency: navigator.hardwareConcurrency || null,
+          deviceMemoryGB: navigator.deviceMemory || null,
+          maxTouchPoints: navigator.maxTouchPoints || 0,
+          connection: pickConnection(),
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            pixelRatio: window.devicePixelRatio || 1
+          },
+          screen: {
+            width: window.screen.width,
+            height: window.screen.height,
+            colorDepth: window.screen.colorDepth
+          },
+          capabilities: {
+            localStorage: storageAvailable('localStorage'),
+            sessionStorage: storageAvailable('sessionStorage'),
+            serviceWorker: 'serviceWorker' in navigator,
+            webDriver: Boolean(navigator.webdriver),
+            reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          }
+        },
+        requestInspection: state.clientEndpoint && state.clientEndpoint.headers
+          ? state.clientEndpoint
+          : (state.clientEndpoint && state.clientEndpoint.request
+              ? state.clientEndpoint.request
+              : null)
+      };
+    }
+
+    function getClientOutputPayload() {
+      if (!state.clientEndpoint) {
+        return null;
+      }
+      if (state.clientEndpoint.headers) {
+        return {
+          endpoint: '/api/client',
+          headers: state.clientEndpoint.headers
+        };
+      }
+      if (state.clientEndpoint.request && state.clientEndpoint.request.headers) {
+        return {
+          endpoint: '/api/client',
+          headers: state.clientEndpoint.request.headers
+        };
+      }
+      return state.clientEndpoint;
+    }
+
+    async function fetchJsonWithFallback(primary, fallback) {
+      let response = await fetch(primary);
+      if (!response.ok && fallback) {
+        response = await fetch(fallback);
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    function render() {
+      const profileOutput = document.getElementById('profile-output');
+      const reportOutput = document.getElementById('report-output');
+      const clientOutput = document.getElementById('client-output');
+      const status = document.getElementById('status');
+      const embedded = document.getElementById('live-client-report');
+
+      profileOutput.textContent = state.profile
+        ? JSON.stringify(state.profile, null, 2)
+        : 'Profile unavailable.';
+
+      reportOutput.textContent = state.report
+        ? JSON.stringify(state.report, null, 2)
+        : 'Report unavailable.';
+
+      clientOutput.textContent = state.clientEndpoint
+        ? JSON.stringify(getClientOutputPayload(), null, 2)
+        : 'Request inspection endpoint unavailable in this environment.';
+
+      if (embedded) {
+        embedded.textContent = state.report
+          ? JSON.stringify(state.report)
+          : '{}';
+      }
+
+      status.textContent = state.profile && state.report
+        ? (state.clientEndpoint
+            ? (state.clientEndpoint.dynamicHeaderEcho === false
+                ? 'Ready in static-host mode. /api/client is available but request header echo is not supported on this host.'
+                : 'Ready. Endpoints loaded and client report collected.')
+            : 'Ready in local/static mode. Deploy to Netlify/Cloudflare for /api/client request data.')
+        : 'Partial data loaded.';
+    }
+
+    async function loadProfile() {
+      state.profile = await fetchJsonWithFallback('/api/info', '/api/info.json');
+      const msg = state.profile && state.profile.agentMessage && state.profile.agentMessage.text;
+      if (msg) {
+        document.getElementById('agent-note-message').textContent = msg;
+      }
+    }
+
+    async function loadClientEndpoint() {
+      state.clientEndpoint = await fetchJsonWithFallback('/api/client', '/api/client.json');
+    }
+
+    function loadReport() {
+      state.report = getClientReport();
+    }
+
+    async function copyReport() {
+      if (!state.report) {
+        return;
+      }
+      const json = JSON.stringify(state.report, null, 2);
+      await navigator.clipboard.writeText(json);
+      document.getElementById('status').textContent = 'Live report copied to clipboard.';
+    }
+
+    function downloadReport() {
+      if (!state.report) {
+        return;
+      }
+      const blob = new Blob([JSON.stringify(state.report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'client-report.json';
+      link.click();
+      URL.revokeObjectURL(url);
+      document.getElementById('status').textContent = 'Live report downloaded as client-report.json.';
+    }
+
+    async function bootstrap() {
+      try {
+        await loadProfile();
+      } catch (error) {
+        document.getElementById('profile-output').textContent = `Failed to fetch profile endpoint: ${error.message}`;
+      }
+
+      try {
+        await loadClientEndpoint();
+      } catch (error) {
+        document.getElementById('client-output').textContent = `Failed to fetch /api/client: ${error.message}`;
+      }
+
+      loadReport();
+      render();
+    }
+
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      copyReport().catch((error) => {
+        document.getElementById('status').textContent = `Copy failed: ${error.message}`;
+      });
+    });
+
+    document.getElementById('download-btn').addEventListener('click', downloadReport);
+    window.addEventListener('resize', () => {
+      loadReport();
+      render();
+    });
+
+    bootstrap();
+  </script>
+</body>
+</html>

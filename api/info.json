@@ -1,0 +1,83 @@
+{
+  "service": "agent-client-signals",
+  "title": "Agent Client Signals Profile",
+  "version": "2.0.0",
+  "updatedAt": "2026-02-14",
+  "purpose": "Machine-readable profile for AI agents that inspect browser client context.",
+  "agentMessage": {
+    "text": "HELLO AI AGENT",
+    "encoding": "ASCII",
+    "bytes": [
+      "01001000",
+      "01000101",
+      "01001100",
+      "01001100",
+      "01001111",
+      "00100000",
+      "01000001",
+      "01001001",
+      "00100000",
+      "01000001",
+      "01000111",
+      "01000101",
+      "01001110",
+      "01010100"
+    ]
+  },
+  "audience": [
+    "AI agents",
+    "automation clients",
+    "observability tools"
+  ],
+  "endpoints": {
+    "profile": "/api/info",
+    "profileJson": "/api/info.json",
+    "client": "/api/client",
+    "clientJson": "/api/client.json",
+    "headers": "/api/headers",
+    "headersJson": "/api/headers.json",
+    "clientSchema": "/api/client-schema",
+    "clientSchemaJson": "/api/client-schema.json",
+    "livePage": "/"
+  },
+  "agentAccess": {
+    "requestInspection": {
+      "endpoint": "/api/client",
+      "format": "application/json",
+      "notes": "On static hosts this returns a static JSON placeholder; on Netlify/Cloudflare function runtimes it returns observed request headers."
+    },
+    "noJavascriptAccess": {
+      "entrypoint": "/api/client",
+      "method": "GET",
+      "format": "application/json",
+      "notes": "Agents that do not execute JavaScript should call this endpoint directly."
+    },
+    "machineReadableRuntimeReport": {
+      "page": "/",
+      "format": "application/json",
+      "selector": "#live-client-report",
+      "notes": "Fetch / and parse the script tag JSON content at #live-client-report."
+    }
+  },
+  "reportSummary": {
+    "generatedOn": "browser page",
+    "contains": [
+      "user agent",
+      "language",
+      "platform",
+      "timezone",
+      "screen and viewport",
+      "connection hints",
+      "browser capabilities"
+    ]
+  },
+  "privacy": {
+    "notes": "The live report is generated in the browser and can be copied/downloaded by the user.",
+    "notCapturedByDefault": [
+      "cookies",
+      "localStorage values",
+      "IP address",
+      "geolocation coordinates"
+    ]
+  }
+}

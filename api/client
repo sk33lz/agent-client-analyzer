@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/client",
+  "generatedAt": "static",
+  "runtime": "static-host",
+  "dynamicHeaderEcho": false,
+  "headers": {},
+  "notes": [
+    "This host serves static files only.",
+    "Per-request header echo requires a serverless/function runtime.",
+    "On Netlify or Cloudflare Pages, /api/client returns observed request headers."
+  ]
+}

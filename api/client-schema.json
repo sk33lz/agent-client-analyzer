@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/api/client-schema.json",
+  "title": "Agent Client Signals Report",
+  "type": "object",
+  "required": ["service", "source", "collectedAt", "client"],
+  "properties": {
+    "service": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "collectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requestInspection": {
+      "type": ["object", "null"],
+      "properties": {
+        "method": { "type": "string" },
+        "path": { "type": "string" },
+        "clientIp": { "type": ["string", "null"] },
+        "userAgent": { "type": ["string", "null"] },
+        "acceptLanguage": { "type": ["string", "null"] },
+        "secChUa": { "type": ["string", "null"] },
+        "secChUaPlatform": { "type": ["string", "null"] },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "client": {
+      "type": "object",
+      "required": ["url", "userAgent", "online", "viewport", "screen", "capabilities"],
+      "properties": {
+        "url": { "type": "string" },
+        "path": { "type": "string" },
+        "referrer": { "type": ["string", "null"] },
+        "userAgent": { "type": "string" },
+        "language": { "type": ["string", "null"] },
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "platform": { "type": ["string", "null"] },
+        "timezone": { "type": ["string", "null"] },
+        "online": { "type": "boolean" },
+        "doNotTrack": { "type": ["string", "null"] },
+        "cookiesEnabled": { "type": "boolean" },
+        "hardwareConcurrency": { "type": ["number", "null"] },
+        "deviceMemoryGB": { "type": ["number", "null"] },
+        "maxTouchPoints": { "type": "number" },
+        "connection": {
+          "type": ["object", "null"],
+          "properties": {
+            "effectiveType": { "type": ["string", "null"] },
+            "downlinkMbps": { "type": ["number", "null"] },
+            "rttMs": { "type": ["number", "null"] },
+            "saveData": { "type": "boolean" }
+          }
+        },
+        "viewport": {
+          "type": "object",
+          "required": ["width", "height", "pixelRatio"],
+          "properties": {
+            "width": { "type": "number" },
+            "height": { "type": "number" },
+            "pixelRatio": { "type": "number" }
+          }
+        },
+        "screen": {
+          "type": "object",
+          "required": ["width", "height", "colorDepth"],
+          "properties": {
+            "width": { "type": "number" },
+            "height": { "type": "number" },
+            "colorDepth": { "type": "number" }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "required": ["localStorage", "sessionStorage", "serviceWorker", "webDriver", "reducedMotion"],
+          "properties": {
+            "localStorage": { "type": "boolean" },
+            "sessionStorage": { "type": "boolean" },
+            "serviceWorker": { "type": "boolean" },
+            "webDriver": { "type": "boolean" },
+            "reducedMotion": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

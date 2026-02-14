@@ -1,0 +1,40 @@
+{
+  "service": "agent-client-signals",
+  "resource": "headers",
+  "version": "1.0.0",
+  "updatedAt": "2026-02-14",
+  "description": "Machine-readable header guidance for agent access to this site.",
+  "endpoints": {
+    "client": "/api/client",
+    "clientJson": "/api/client.json",
+    "headers": "/api/headers",
+    "headersJson": "/api/headers.json",
+    "profile": "/api/info",
+    "clientSchema": "/api/client-schema"
+  },
+  "requestHeaders": {
+    "required": [],
+    "recommended": [
+      {
+        "name": "Accept",
+        "value": "application/json",
+        "purpose": "Request JSON responses from API endpoints."
+      },
+      {
+        "name": "User-Agent",
+        "purpose": "Sent by the client automatically or explicitly to identify itself."
+      }
+    ]
+  },
+  "responseHeaders": {
+    "contentType": "application/json; charset=utf-8",
+    "cacheControl": "public, max-age=300"
+  },
+  "notes": [
+    "Use /api/client for machine-readable request header inspection.",
+    "On static-only hosts (for example Surge), /api/client is a static placeholder and cannot echo per-request headers.",
+    "No JavaScript is required: agents can call /api/client with plain HTTP GET.",
+    "Use /api/info for service metadata and /api/client-schema for report structure.",
+    "Browser runtime details are collected on / and shown in the live client report."
+  ]
+}
